@@ -41,7 +41,7 @@ Then select it with `/output-style`.
 | Skill      | Trigger     | Purpose                                          |
 |------------|-------------|--------------------------------------------------|
 | `bro`      | `/bro`      | Re-explain the previous response more simply     |
-| `handover` | `/handover` | Write a disposable handoff document for a fresh agent |
+| `handover` | `/handover` | Write a disposable handover document for a fresh agent |
 | `lock-in`  | `/lock-in`  | Validate and update project docs to match current state |
 
 ### Installation
