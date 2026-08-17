@@ -38,16 +38,17 @@ Then select it with `/output-style`.
 
 ## Skills
 
-| Skill | Trigger | Purpose                                      |
-|-------|---------|----------------------------------------------|
-| `bro` | `/bro`  | Re-explain the previous response more simply |
+| Skill      | Trigger     | Purpose                                          |
+|------------|-------------|--------------------------------------------------|
+| `bro`      | `/bro`      | Re-explain the previous response more simply     |
+| `handover` | `/handover` | Write a disposable handoff document for a fresh agent |
 
 ### Installation
 
 **Claude Code**
 
 ```bash
-cp -r skills/bro ~/.claude/skills/
+cp -r skills/<skill> ~/.claude/skills/
 # or project-level: .claude/skills/
 ```
 
