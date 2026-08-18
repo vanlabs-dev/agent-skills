@@ -42,6 +42,7 @@ Then select it with `/output-style`.
 |------------|-------------|--------------------------------------------------|
 | `bro`      | `/bro`      | Re-explain the previous response more simply     |
 | `handover` | `/handover` | Write a disposable handover document for a fresh agent |
+| `lazy`     | `/lazy`     | Force the minimum correct solution via a decision ladder |
 | `lock-in`  | `/lock-in`  | Validate and update project docs to match current state |
 | `status`   | `/status`   | Audit repo docs, git state, and gates; report standing and next action |
 
