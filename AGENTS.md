@@ -7,9 +7,8 @@ Personal library of portable agent skills and output styles. One author, no exte
 1. Create `skills/<name>/SKILL.md`. Lowercase kebab-case name, one skill per folder.
 2. Frontmatter requires `name` and `description`. Other Agent Skills fields (`argument-hint`, `disable-model-invocation`, `allowed-tools`) are allowed when needed. Write the description in third person, state what the skill does and when to use it, and include the `/name` trigger. No XML tags, under 1024 characters.
 3. Keep the body a lean instruction set: rules and steps, not essays.
-4. A skill that depends on an external service (an MCP server, a CLI, an API) names the dependency in its description and starts with a gate: if the dependency is absent, stop and print the install one-liner.
-5. Add a row to the skills table in `README.md`. Keep the table alphabetical.
-6. Install locally: `cp -r skills/<name> ~/.claude/skills/`.
+4. Add a row to the skills table in `README.md`. Keep the table alphabetical.
+5. Install locally: `cp -r skills/<name> ~/.claude/skills/`.
 
 ## Writing rules
 
