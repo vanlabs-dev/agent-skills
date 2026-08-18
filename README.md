@@ -1,24 +1,20 @@
 # agent-skills
 
-Portable skills and response styles for AI agents.
+Personal library of portable skills and response styles for AI agents.
 
-Designed to work across Claude Code, Pi, and other agent runtimes.
+This repo holds what I have found to work. Built for Claude Code first, portable to Pi and other agent runtimes.
 
 ## Structure
 
 ```
 agent-skills/
+├── AGENTS.md   # Agent-facing conventions for working on this repo
+├── CLAUDE.md   # Claude Code shim, imports AGENTS.md
 ├── styles/     # Response / output styles (e.g. DIRECT)
-├── skills/     # Portable skills (Agent Skills format: skill-name/SKILL.md)
-├── prompts/    # Optional reusable prompts
-└── configs/    # Optional tool-specific overrides
-    ├── claude/
-    └── pi/
+├── skills/     # Skills in the Agent Skills format (skill-name/SKILL.md)
+├── prompts/    # Reusable prompts (empty until needed)
+└── configs/    # Tool-specific overrides (empty until needed)
 ```
-
-- `skills/` follows the emerging Agent Skills standard (`skill-name/SKILL.md`), already used by Claude Code and easily adapted by other agents.
-- `styles/` stays separate because response styles are conceptually different from skills. Most agents can use the markdown content directly as a system/instruction prompt.
-- `configs/` is optional and only for cases where a tool needs its own format.
 
 ## Styles
 
@@ -26,15 +22,13 @@ agent-skills/
 |----------|--------------------------------------------------|
 | `direct` | Direct, concise, low-clutter technical responses |
 
-Copy the content into your agent's system prompt, style settings, or instructions.
-
 **Claude Code**
 
 ```bash
 cp styles/direct.md ~/.claude/output-styles/
 ```
 
-Then select it with `/output-style`.
+Then select it with `/output-style`. Other agents can use the markdown content directly as a system or instruction prompt.
 
 ## Skills
 
@@ -46,7 +40,7 @@ Then select it with `/output-style`.
 | `lock-in`  | `/lock-in`  | Validate and update project docs to match current state |
 | `status`   | `/status`   | Audit repo docs, git state, and gates; report standing and next action |
 
-### Installation
+### Install
 
 **Claude Code**
 
@@ -57,7 +51,7 @@ cp -r skills/<skill> ~/.claude/skills/
 
 **Pi / other agents**
 
-Copy the `SKILL.md` content into the agent's skill/instruction system, or place the folder where your agent loads skills from.
+Copy the `SKILL.md` content into the agent's skill/instruction system, or place the folder where the agent loads skills from.
 
 ## License
 
