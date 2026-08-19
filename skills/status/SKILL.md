@@ -34,9 +34,9 @@ Detect gates from CI config, package.json, pyproject.toml, Makefile, or equivale
 
 Use this fixed format. Keep it compressed. No filler.
 
-**What it is** — 2-3 sentences: purpose, stack, how it runs or ships.
+**What it is**: 2-3 sentences covering purpose, stack, and how it runs or ships.
 
-**Standing** — bullets, most important first:
+**Standing**: bullets, most important first:
 
 - Shipped or deployed state and what the last commits delivered
 - Gates result (tests passed/skipped, lint verdict)
@@ -44,4 +44,4 @@ Use this fixed format. Keep it compressed. No filler.
 - Active planned work and its completeness
 - Hygiene flags, if any
 
-**Next action** — one bullet. The single most critical pending action. Make it concrete enough to start immediately. Prefer the repo's own planning artifacts. Only infer from gaps if no plan exists. If nothing is pending, say so.
+**Next action**: one bullet. The single most critical pending action. Make it concrete enough to start immediately. Prefer the repo's own planning artifacts. Only infer from gaps if no plan exists. If nothing is pending, say so.

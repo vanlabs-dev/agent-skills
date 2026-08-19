@@ -11,7 +11,8 @@ agent-skills/
 ├── AGENTS.md   # Agent-facing conventions for working on this repo
 ├── CLAUDE.md   # Claude Code shim, imports AGENTS.md
 ├── styles/     # Response / output styles (e.g. DIRECT)
-├── skills/     # Skills in the Agent Skills format (skill-name/SKILL.md)
+├── skills/     # Skills in the Agent Skills format (skill-name/SKILL.md,
+│            #   plus optional skill-name/scripts/)
 ├── prompts/    # Reusable prompts (empty until needed)
 └── configs/    # Tool-specific overrides (empty until needed)
 ```
@@ -32,13 +33,15 @@ Then select it with `/output-style`. Other agents can use the markdown content d
 
 ## Skills
 
-| Skill      | Trigger     | Purpose                                          |
-|------------|-------------|--------------------------------------------------|
-| `bro`      | `/bro`      | Re-explain the previous response more simply     |
-| `handover` | `/handover` | Write a disposable handover document for a fresh agent |
-| `lazy`     | `/lazy`     | Force the minimum correct solution via a decision ladder |
-| `lock-in`  | `/lock-in`  | Validate and update project docs to match current state |
-| `status`   | `/status`   | Audit repo docs, git state, and gates; report standing and next action |
+| Skill        | Trigger       | Purpose                                                                  |
+|--------------|---------------|--------------------------------------------------------------------------|
+| `bro`        | `/bro`        | Re-explain the previous response more simply                             |
+| `greenfield` | `/greenfield` | Enforce the full build lifecycle from brainstorm to ship                 |
+| `handover`   | `/handover`   | Write a disposable handover document for a fresh agent                   |
+| `lazy`       | `/lazy`       | Force the minimum correct solution via a decision ladder                 |
+| `lock-in`    | `/lock-in`    | Validate and update project docs to match current state                  |
+| `show-me`    | `/show-me`    | Render a visual answer as self-contained HTML and open it in the browser |
+| `status`     | `/status`     | Audit repo docs, git state, and gates; report standing and next action   |
 
 ### Install
 
