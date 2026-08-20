@@ -28,5 +28,7 @@ A skill may ship helpers under `skills/<name>/scripts/`. Rules:
 
 ## Do not
 
-- Do not add build tooling, dependencies, or scaffolding.
+- Do not add build tooling, dependencies, or scaffolding to this repo. A skill
+  may still require an external tool of its host: `greenfield` requires the
+  OpenSpec CLI. State the requirement in the skill and in `README.md`.
 - Do not edit installed copies under `~/.claude/skills/`. Edit here, then re-copy. The one exception is `greenfield`: the deployed copy carries this machine's scaffold rules on purpose, so the repo copy is the portable subset and the two are not identical.

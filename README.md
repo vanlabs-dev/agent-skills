@@ -44,11 +44,10 @@ Then select it with `/output-style`. Other agents can use the markdown content d
 | `status`     | `/status`     | Audit repo docs, git state, and gates; report standing and next action   |
 
 `greenfield` requires the [OpenSpec](https://github.com/Fission-AI/OpenSpec) CLI
-and its `opsx` commands (`explore`, `propose`, `update`, `apply`, `sync`,
-`archive`). Install the
-CLI with `npm i -g @fission-ai/openspec`, then run `openspec init` in the
-project, or install the opsx commands and skills once for the agent and run
-`openspec init --tools none` per project.
+and its `opsx` commands: `explore`, `propose`, `update`, `apply`, `sync`,
+`archive`. Install the CLI with `npm i -g @fission-ai/openspec`, then run
+`openspec init` in the project. If the opsx commands are already installed for
+the agent, use `openspec init --tools none` instead.
 
 ### Install
 
