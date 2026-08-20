@@ -36,7 +36,8 @@ else
   FAILED=1
 fi
 
-for f in 07-review.md 08-verify.md 09-ship.md; do
+# 08-verify.md is skipped: it is the file this run is being written into.
+for f in 07-review.md 09-ship.md; do
   if [[ -f "$ART/$f" ]]; then
     echo "  OK  $f"
   else
@@ -47,8 +48,16 @@ echo
 
 # --- OpenSpec change presence ---
 echo "Checking OpenSpec change..."
+# find exits non-zero on a missing archive dir, and pipefail would abort here.
+archived=""
+if [[ -d "$ROOT/openspec/changes/archive" ]]; then
+  archived="$(find "$ROOT/openspec/changes/archive" -maxdepth 1 -type d -name "*-$SLUG" | head -1)"
+fi
+
 if [[ -d "$ROOT/openspec/changes/$SLUG" ]]; then
   echo "  OK  openspec/changes/$SLUG"
+elif [[ -n "$archived" ]]; then
+  echo "  OK  already archived: ${archived#"$ROOT"/}"
 elif [[ -d "$ROOT/openspec/changes" ]]; then
   echo "  note  openspec/changes exists but no change named $SLUG"
 elif [[ -d "$ROOT/openspec" ]]; then
