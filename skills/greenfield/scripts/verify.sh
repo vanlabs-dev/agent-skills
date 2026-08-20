@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# greenfield verify helper: deterministic gate for phase 8
+# greenfield verify helper: deterministic gate before archive
 # Usage: verify.sh <slug> [project-root]
-# Exit 0 = pass, non-zero = fail
+# Exit 0 = pass, 1 = fail, 2 = usage error
 
 set -euo pipefail
 
@@ -18,6 +18,7 @@ ROOT="$(cd "$ROOT" 2>/dev/null && pwd)" || {
   echo "Project root not found: ${2:-.}"
   exit 2
 }
+
 ART="$ROOT/docs/greenfield/$SLUG"
 FAILED=0
 
@@ -26,32 +27,16 @@ echo "Project root: $ROOT"
 echo "Artifact dir: $ART"
 echo
 
-if [[ ! -d "$ART" ]]; then
-  echo "No artifact directory. Run the earlier phases first."
-  echo "RESULT: FAIL"
-  exit 1
+# --- required greenfield artifacts ---
+echo "Checking greenfield artifacts..."
+if [[ -f "$ART/01-brainstorm.md" ]]; then
+  echo "  OK  01-brainstorm.md"
+else
+  echo "  MISSING  01-brainstorm.md"
+  FAILED=1
 fi
 
-# --- required artifacts ---
-required=(
-  "01-brainstorm.md"
-  "03-spec.md"
-  "04-design.md"
-  "05-tasks.md"
-)
-
-echo "Checking required artifacts..."
-for f in "${required[@]}"; do
-  if [[ -f "$ART/$f" ]]; then
-    echo "  OK  $f"
-  else
-    echo "  MISSING  $f"
-    FAILED=1
-  fi
-done
-
-# optional but expected late-phase files
-for f in 06-implement.md 07-review.md 08-verify.md; do
+for f in 07-review.md 08-verify.md 09-ship.md; do
   if [[ -f "$ART/$f" ]]; then
     echo "  OK  $f"
   else
@@ -60,25 +45,21 @@ for f in 06-implement.md 07-review.md 08-verify.md; do
 done
 echo
 
-# --- human approval markers ---
-echo "Checking human approval markers..."
-if grep -qE '^Approved:' "$ART/03-spec.md" 2>/dev/null; then
-  echo "  OK  03-spec.md has Approved line"
+# --- OpenSpec change presence ---
+echo "Checking OpenSpec change..."
+if [[ -d "$ROOT/openspec/changes/$SLUG" ]]; then
+  echo "  OK  openspec/changes/$SLUG"
+elif [[ -d "$ROOT/openspec/changes" ]]; then
+  echo "  note  openspec/changes exists but no change named $SLUG"
+elif [[ -d "$ROOT/openspec" ]]; then
+  echo "  note  openspec root exists but no changes directory"
 else
-  echo "  FAIL  03-spec.md missing 'Approved:' line"
-  FAILED=1
-fi
-
-if grep -qE '^Approved:' "$ART/04-design.md" 2>/dev/null; then
-  echo "  OK  04-design.md has Approved line"
-else
-  echo "  FAIL  04-design.md missing 'Approved:' line"
-  FAILED=1
+  echo "  note  no openspec root found (change may live in a registered store)"
 fi
 echo
 
 # --- project checks (best-effort) ---
-# Test output is not suppressed: the full output is the evidence 08-verify.md
+# Output is not suppressed: the full output is the evidence 08-verify.md
 # must capture.
 echo "Running project checks (if present)..."
 cd "$ROOT"
@@ -109,14 +90,12 @@ if [[ -f "pyproject.toml" ]] || [[ -f "pytest.ini" ]] || [[ -d "tests" ]]; then
   fi
 fi
 
-if [[ -f "Cargo.toml" ]]; then
-  if command -v cargo >/dev/null 2>&1; then
-    if cargo test --quiet; then
-      echo "  OK  cargo test"
-    else
-      echo "  FAIL  cargo test"
-      FAILED=1
-    fi
+if [[ -f "Cargo.toml" ]] && command -v cargo >/dev/null 2>&1; then
+  if cargo test --quiet; then
+    echo "  OK  cargo test"
+  else
+    echo "  FAIL  cargo test"
+    FAILED=1
   fi
 fi
 

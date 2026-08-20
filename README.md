@@ -36,12 +36,19 @@ Then select it with `/output-style`. Other agents can use the markdown content d
 | Skill        | Trigger       | Purpose                                                                  |
 |--------------|---------------|--------------------------------------------------------------------------|
 | `bro`        | `/bro`        | Re-explain the previous response more simply                             |
-| `greenfield` | `/greenfield` | Enforce the full build lifecycle from brainstorm to ship                 |
+| `greenfield` | `/greenfield` | Enforce the build lifecycle: brainstorm, OpenSpec, verify, archive       |
 | `handover`   | `/handover`   | Write a disposable handover document for a fresh agent                   |
 | `lazy`       | `/lazy`       | Force the minimum correct solution via a decision ladder                 |
 | `lock-in`    | `/lock-in`    | Validate and update project docs to match current state                  |
 | `show-me`    | `/show-me`    | Render a visual answer as self-contained HTML and open it in the browser |
 | `status`     | `/status`     | Audit repo docs, git state, and gates; report standing and next action   |
+
+`greenfield` requires the [OpenSpec](https://github.com/Fission-AI/OpenSpec) CLI
+and its `opsx` commands (`explore`, `propose`, `update`, `apply`, `sync`,
+`archive`). Install the
+CLI with `npm i -g @fission-ai/openspec`, then run `openspec init` in the
+project, or install the opsx commands and skills once for the agent and run
+`openspec init --tools none` per project.
 
 ### Install
 

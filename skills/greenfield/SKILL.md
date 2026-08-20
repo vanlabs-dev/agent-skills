@@ -1,64 +1,76 @@
 ---
 name: greenfield
-description: Enforce the full greenfield development lifecycle from brainstorm to ship. Use when starting a new project, a new feature, or any non-trivial build. Brainstorm is the mandatory first step unless the human explicitly overrides. Use when the user types /greenfield or says they want to start a proper build lifecycle.
+description: Enforce a greenfield build lifecycle with mandatory brainstorm, OpenSpec for the change core, explicit fresh-session boundaries, and deterministic verify. Use when starting a new project, a new feature, or any non-trivial build. Use when the user types /greenfield or says they want to start a proper build lifecycle.
 ---
 
 # Greenfield
 
-Enforce a complete development lifecycle. Prevent drift. Produce clear
-artifacts. Allow human skips after the first gate.
+Run a full build lifecycle without context rot. Brainstorm is mandatory.
+OpenSpec owns the change core. Fresh sessions are required at fixed boundaries.
+Documentation must be current before every stop so the next session never
+drifts.
 
 ## Hard rules
 
-- Brainstorm is mandatory before any creative or implementation work unless the
-  human explicitly says to skip it.
-- Do not jump phases. Complete or explicitly skip the current phase before
-  starting the next.
-- Every phase writes or updates an artifact under `docs/greenfield/<slug>/`.
-- Human approval is required at Spec and Design. Approval is a literal line
-  `Approved: <date or name>` in the artifact. The same format in both.
-- Implementation starts in a fresh session. The session that ran Brainstorm
-  stops after Task breakdown. See the session boundary below.
-- Verify is deterministic: run the skill's verify script, capture its full
-  output, and treat non-zero exit as failure. Claims without script evidence
-  are rejected.
-- Prefer `/lazy` rules during Implement.
-- Keep artifacts short and structured. No essays.
-- Never use em dashes in any artifact. Use a comma, a colon, parentheses, or a
-  new sentence instead.
+- Brainstorm is mandatory unless the human explicitly overrides it.
+- Do not cross a session boundary in the same context. Stop, lock docs, and
+  tell the human to start a fresh session.
+- Before every stop, durable artifacts and project docs must be accurate.
+  Prefer `/lock-in` when docs may have drifted.
+- OpenSpec owns explore, propose, update, apply, sync, and archive. Do not
+  reinvent those phases.
+- Human approval is required on the OpenSpec proposal before apply.
+- Verify is deterministic: run the skill verify script and capture real output.
+  Non-zero exit means fail.
+- Prefer `/lazy` during implementation.
+- Keep artifacts short. No essays. Never use em dashes.
 
-## Artifact layout
+## Requirements
+
+OpenSpec must be available: the `openspec` CLI on `PATH`, and the `opsx`
+commands or the equivalent `openspec-*` skills installed for the agent. Six
+workflows are in play: `explore`, `propose`, `update`, `apply`, `sync`,
+`archive`.
+
+The project needs an OpenSpec root before Session 2. If `openspec/` does not
+exist, create it once:
 
 ```
-docs/greenfield/<slug>/
-├── 01-brainstorm.md
-├── 02-explore.md          (optional)
-├── 03-spec.md
-├── 04-design.md
-├── 05-tasks.md
-├── 06-implement.md
-├── 07-review.md
-├── 08-verify.md
-└── 09-ship.md
+$ openspec init --tools none
 ```
 
-Use a short kebab-case slug derived from the goal.
+Use `--tools none` when the opsx commands are already installed for the agent
+outside the project. Otherwise run `openspec init` and let it write the tool
+files.
 
-## Phase sequence
+## Why session boundaries exist
 
-### 1. Brainstorm (mandatory gate)
+Long context degrades model quality. This skill assumes the human will clear
+context and start a fresh session at each boundary below. Write every handoff
+so a cold agent can continue from docs alone.
+
+## Lifecycle
+
+```
+Session 1  Brainstorm          -> lock -> STOP
+Session 2  OpenSpec propose    -> human approval -> lock -> STOP
+Session 3  Outside-voice       -> lock -> STOP          (optional but recommended)
+Session 4  OpenSpec apply      -> verify -> archive -> done
+```
+
+Explore may run inside Session 2 before propose. It is optional.
+
+### Session 1 - Brainstorm (mandatory gate)
 
 **Goal:** Turn a rough idea into a clear direction.
 
 **Do:**
-- Ask focused questions (prefer multiple choice when possible).
-- Surface constraints, success signals, non-goals, and open questions.
+- Ask focused questions. Prefer multiple choice.
+- Surface constraints, success signals, non-goals, open questions.
 - Propose 2 or 3 directions with trade-offs.
-- Once the directions are settled, offer `/show-me` (PICK mode) to render them
-  side by side. Optional. Accept a skip and continue in prose.
 - Stop and wait for human approval of the chosen direction.
 
-**Artifact:** `01-brainstorm.md` with sections:
+**Write:** `docs/greenfield/<slug>/01-brainstorm.md` with:
 - Goal
 - Success signals
 - Constraints / non-goals
@@ -66,182 +78,147 @@ Use a short kebab-case slug derived from the goal.
 - Chosen direction
 - Open questions
 
-**Exit:** Human has approved the chosen direction. Only then proceed.
+Use a short kebab-case slug derived from the goal. Reuse the same slug as the
+OpenSpec change name.
 
-### 2. Explore (optional)
+**Before stop:**
+- Ensure the brainstorm artifact is complete and accurate.
+- Run `/lock-in` if project docs need updating.
+- Tell the human: session boundary reached. Start a fresh session and run
+  `/greenfield continue <slug>` for Session 2.
 
-**Goal:** Reduce unknowns before writing the spec.
+**Do not** start OpenSpec or write code in this session.
 
-**Do only if useful:** read existing code, compare approaches, check
-constraints, answer open questions from brainstorm.
+### Session 2 - OpenSpec propose
 
-**Artifact:** `02-explore.md`: findings, decisions, remaining unknowns.
-
-**Skip when:** the human already knows the shape, or brainstorm was enough.
-
-### 3. Spec / PRD (human gate)
-
-**Goal:** Define what will be built and what done means.
-
-**Required sections in `03-spec.md`:**
-- Problem / outcome
-- In scope
-- Out of scope
-- Acceptance criteria (concrete, testable)
-- Non-functional constraints (if any)
-- Open questions (must be empty or explicitly deferred)
-
-**Exit:** Human marks the spec approved with a line `Approved: <date or name>`.
-Do not proceed without it.
-
-### 4. Design / Plan (human gate)
-
-**Goal:** Decide how it will be built.
-
-**Required sections in `04-design.md`:**
-- Approach
-- Key decisions and rationale
-- Structure / boundaries
-- Risks and mitigations
-- What is deliberately left flexible
-
-**Optional:** if the design has a visible shape (layout, screen, structure),
-offer `/show-me` (SHOW mode) before asking for approval. The render supports the
-approval, it does not replace it. Store it under
-`docs/greenfield/<slug>/renders/` and reference it from the artifact.
-
-**Exit:** Human marks the design approved with a line
-`Approved: <date or name>`. Do not proceed without it.
-
-### 5. Task breakdown
-
-**Goal:** Turn design into an ordered, checkable list.
-
-**Artifact:** `05-tasks.md`: short, ordered tasks. Each task should be
-completable in one focused pass. Mark dependencies if needed.
-
-**Exit:** Task list exists and is coherent with the design.
-
-### Session boundary (mandatory pause)
-
-The planning session ends here. Do not begin Implement in the session that ran
-Brainstorm. A fresh session reads the artifacts cold, which is the point: if
-the artifacts are not enough to build from, they were not done.
+**Goal:** Produce the change artifacts OpenSpec expects.
 
 **Do:**
-- Run `/handover` so the handover notes capture anything the artifacts missed.
-- Give the human a kickoff command for the new session, filled in:
+- Read `01-brainstorm.md` and current project docs first.
+- Ensure an OpenSpec root exists (see Requirements).
+- Optionally run `/opsx:explore` if unknowns remain.
+- Run `/opsx:propose` for the change.
+- Walk the human through the proposal, specs, design, and tasks.
+- Run `/opsx:update` to revise the change if the human asks for edits. Do not
+  hand-edit the artifacts.
+- Require explicit human approval before leaving this session.
 
-  ```
-  /greenfield implement <slug>. Read docs/greenfield/<slug>/ first, then
-  continue from 05-tasks.md.
-  ```
+**Before stop:**
+- OpenSpec change artifacts must exist and reflect the approved direction.
+- Record approval as a line `Approved: <date or name>` in the proposal or in a
+  short note under `docs/greenfield/<slug>/`.
+- `/lock-in` if needed.
+- Tell the human: session boundary reached. Fresh session for outside-voice
+  (Session 3) or apply (Session 4).
 
-- Stop. Wait for the human to start the new session.
+**Do not** run `/opsx:apply` in this session.
 
-If Implement is requested in the same session anyway, name the risk (context
-bleed from planning) and proceed only on explicit confirmation.
+### Session 3 - Outside-voice review (recommended)
 
-### 6. Implement
-
-**Goal:** Build the thing.
-
-**Rules:**
-- Confirm this is a fresh session. If this session ran Brainstorm, stop and
-  follow the session boundary above instead.
-- Read `docs/greenfield/<slug>/` before writing code.
-- Follow `/lazy` (minimum correct solution, surgical changes).
-- Check off tasks in `05-tasks.md` as they complete.
-- Record deviations from the design, surprises, and wrong turns in
-  `06-implement.md`. Wrong turns are part of the record, not noise.
-- Do not expand scope. New ideas go to open questions or a future change.
-- If this is a brand-new directory, repository, or environment, follow the
-  operator's own layout and scaffold conventions before writing code. This
-  skill does not define them.
-
-### 7. Outside-voice review
-
-**Goal:** Get a second perspective before claiming done.
+**Goal:** Attack the plan with a cold perspective.
 
 **Do:**
-- Summarize intent, key decisions, and the diff or main changes.
-- Ask a fresh session (or different model) to attack the plan and
-  implementation: missing edge cases, over-engineering, unclear acceptance
-  criteria, hidden assumptions.
-- Record findings and responses in `07-review.md`.
+- Start from docs and OpenSpec artifacts only. No prior chat memory.
+- Challenge edge cases, over-engineering, weak acceptance criteria, hidden
+  assumptions.
+- Record findings in `docs/greenfield/<slug>/07-review.md`.
+- Resolve or explicitly accept critical findings with the human. Fold accepted
+  changes back in with `/opsx:update`, not by hand.
 
-**Exit:** Review notes exist. Critical findings are resolved or explicitly
-accepted by the human.
+**Before stop:**
+- Review notes are written.
+- `/lock-in` if the proposal or docs changed.
+- Tell the human: session boundary reached. Fresh session for apply.
 
-### 8. Verify (deterministic gate)
+### Session 4 - Apply, verify, archive
 
-**Goal:** Prove the acceptance criteria are met.
-
-**Do:**
-- Run the verify script from the project root:
-
-  ```
-  $ bash <skill-dir>/scripts/verify.sh <slug> .
-  ```
-
-  `<skill-dir>` is the folder holding this `SKILL.md`, for example
-  `~/.claude/skills/greenfield/` or `.claude/skills/greenfield/`.
-
-- Capture the full script output into `08-verify.md`.
-- Map each acceptance criterion to evidence (pass/fail plus a pointer to
-  output or test name).
-- If the script exits non-zero, the phase has failed. Fix issues and re-run.
-  Do not claim pass.
-
-**Exit:** `08-verify.md` contains the real script output and a clear PASS
-verdict from the script. No script run means no pass.
-
-### 9. Ship + Archive
-
-**Goal:** Close the loop and prevent future drift.
+**Goal:** Build, prove, and close.
 
 **Do:**
-- Update living project docs if behavior changed (`README`, `AGENTS.md`,
-  specs, etc.).
-- If a new durable directory was created, record it wherever this machine
-  tracks its layout.
-- Write a short `09-ship.md`: what shipped, where the artifacts live, any
-  follow-ups.
-- Archive or leave the `docs/greenfield/<slug>/` folder as the record of this
-  change.
-- Prefer a clean commit message that references the slug or spec.
+1. Read the current OpenSpec change, review notes, and project docs.
+2. Run `/opsx:apply`. Follow `/lazy` rules while implementing.
+3. Run the verify script from the project root:
 
-**Exit:** Living docs are consistent with the shipped state. Artifact set is
-complete.
+   ```
+   $ bash <skill-dir>/scripts/verify.sh <slug> .
+   ```
 
-## Skipping phases
+   `<skill-dir>` is the folder holding this `SKILL.md`, for example
+   `~/.claude/skills/greenfield/` or `.claude/skills/greenfield/`.
 
-- The human may directly request a later phase (e.g. "skip to design" or
-  "/greenfield verify").
-- When skipping, still read any existing earlier artifacts for context.
-- Brainstorm may only be skipped when the human explicitly overrides the gate.
-- Record skips briefly in the next artifact you write ("Skipped explore:
-  requirements already clear").
+   Capture the full output into `docs/greenfield/<slug>/08-verify.md`. Non-zero
+   exit is a fail. Fix and re-run. Do not claim pass without a script PASS.
+4. On pass, run `/opsx:archive` so delta specs merge into the living OpenSpec
+   library and the change is closed. Use `/opsx:sync` instead only when the
+   human wants the specs merged while the change stays open.
+5. Update living project docs if behaviour changed.
+6. Write a short `docs/greenfield/<slug>/09-ship.md`: what shipped, where
+   artifacts live, follow-ups.
 
-## Phase awareness
+**Exit:** OpenSpec change archived, verify PASS recorded, living docs
+consistent.
 
-At the start of every response in this skill, know:
-1. Which phase is active
-2. What artifact it must produce or update
-3. What the exit criteria are
-4. What the next phase is
+## Session boundary protocol
 
-If the human asks to jump ahead, confirm the skip and state what will be
-missing.
+At every STOP:
 
-## Integration with other skills
+1. State which session just finished and which comes next.
+2. Confirm durable artifacts are written.
+3. Confirm docs are not drifting (use `/lock-in` when unsure).
+4. Give the human one clear instruction for the fresh session, including the
+   slug and next command.
 
-- Use `/lazy` during Implement.
-- Use `/lock-in` when documentation must be made accurate before a session
-  boundary.
-- Use `/status` to audit standing before or after a change.
-- Use `/handover` at the session boundary, and when pausing mid-lifecycle for
-  a fresh agent.
-- Use `/bro` if any phase output is unclear to the human.
-- Offer `/show-me` at Brainstorm and Design when the decision is visual. Always
-  optional, never a gate.
+Example stop line:
+
+```
+Session 1 complete. Brainstorm approved and locked.
+Start a fresh session, then: /greenfield continue <slug>
+(or /opsx:propose if you prefer to enter OpenSpec directly)
+```
+
+## Skipping
+
+- The human may skip to a later session explicitly (for example "skip to
+  apply").
+- Brainstorm may only be skipped on explicit override.
+- When skipping, still read existing artifacts. Record the skip in the next
+  file you write.
+- Never skip the verify script before archive.
+
+## Pickup in a fresh session
+
+When the human continues after a boundary:
+
+1. Read `docs/greenfield/<slug>/` and the OpenSpec change status first
+   (`openspec status --change <slug>`).
+2. Identify the last completed session from artifacts.
+3. Announce the session you are starting and the exit criteria.
+4. Do not re-brainstorm or re-propose unless the human asks.
+
+## Integration
+
+- `/lazy` during apply
+- `/lock-in` before every session stop when docs may have changed
+- `/handover` only if the human is pausing mid-session for a different agent.
+  Normal boundaries use the protocol above.
+- `/status` to audit standing before or after a change
+- `/bro` if any step is unclear
+- `/show-me` optional at brainstorm or proposal review when the choice is
+  visual
+
+## Artifact layout (thin, beside OpenSpec)
+
+```
+docs/greenfield/<slug>/
+├── 01-brainstorm.md
+├── 07-review.md        (optional)
+├── 08-verify.md
+└── 09-ship.md
+```
+
+OpenSpec owns its own change directory (`openspec/changes/<slug>/`). Do not
+duplicate proposal, specs, design, or tasks into `docs/greenfield/`.
+
+If this is a brand-new directory, repository, or environment, follow the
+operator's own layout and scaffold conventions before writing code. This skill
+does not define them.
